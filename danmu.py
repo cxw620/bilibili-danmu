@@ -7,7 +7,7 @@ import urllib3
 
 
 def getdanmu():
-    global jsonsaved, danmu_name, danmu_text, danmu_no
+    global jsonsaved, danmu_name, danmu_text, danmu
     if input("默认打开作者的直播间，确定吗？确认输入y，否则输入n") == "n":
         cid = input("请输入房间号：")
     else:
@@ -30,23 +30,26 @@ def getdanmu():
                                  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.64"})
     jsonsaved = json.loads(r.data.decode("utf-8"))
     savedanmu()
-    # print(danmu_name)
+    # print(danmu)
 
 
-# 由于后续的开发目标（弄个gui）需要多次用到保存，就单独拎出来了
+# 由于后续的开发目标（弄个GUI）需要多次用到保存，就单独拎出来了
 def savedanmu():
-    global jsonsaved, danmu_name, danmu_text, danmu_no
+    # 不同def间公用变量？啊不懂
+    global jsonsaved, danmu_name, danmu_text, danmu
     c = 1
     # 数组不太会用，只能用字典了
-    danmu_name = {}
-    danmu_text = {}
-    danmu_no = {}
-    while c <= 10:
-        ts = jsonsaved["data"]["room"][c - 1]["check_info"]["ts"]
-        danmu_name[ts] = jsonsaved["data"]["room"][c - 1]["nickname"]
-        danmu_text[ts] = jsonsaved["data"]["room"][c - 1]["text"]
-        danmu_no[str(len(danmu_name) + 1)] = ts
+    danmu_name = []
+    danmu_text = []
+    # 目前设计为每次都会重置”弹幕库“，若做了GUI也考虑能否保存到文件
+    danmu = {}
+    while c <= len(jsonsaved["data"]["room"]):
+        # python不支持dict的key为list或dict类型
+        # 这里还是不满意，数组还是不太会
+        danmu[len(danmu) + 1] = [jsonsaved["data"]["room"][c - 1]["check_info"]["ts"],
+                                 jsonsaved["data"]["room"][c - 1]["nickname"], jsonsaved["data"]["room"][c - 1]["text"]]
         c = c + 1
+    # 还是搞不太懂为什么加个return，但反正跑得起来就行了
     return
 
 
